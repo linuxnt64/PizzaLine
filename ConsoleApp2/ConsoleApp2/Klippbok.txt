@@ -1,0 +1,42 @@
+﻿        public Customer(string _name, string _street, string _city, string _phone, string _order, bool _served)
+        {
+            Name = _name;
+            Street = _street;
+            if (_city == "") {
+                City = "Skoga";
+            } else {
+                City = _city; };
+            Phone = _phone;
+            Order = _order;
+            Queued = _queued;
+        }
+
+    //public string FirstName => 
+
+
+Inmatning:
+
+1Staffan
+Kvarnv. 2
+
+071/23 456 789
+Kebabpizza stark sås
+
+1Milla
+Kvarnv. 2
+Njutånger
++4771-73456 000
+Jamaica, bea
+
+1Sebbe
+Uppstigen lgh 407
+Askim
+07373456091
+Kycklingsallad, currysås
+
+1Samba
+Kvarnv. 2
+
+123456789
+Pizzakanter
+
