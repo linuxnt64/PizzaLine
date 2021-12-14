@@ -13,9 +13,9 @@ namespace ConsoleApp2
         private static List<Order> orders = new List<Order>();
 
         public string Consignee { get; set; }
+        public string Phone { get; set; }
         public string Street { get; set; }
         public string City { get; set; }
-        public string Phone { get; set; }
         public string Food { get; set; }
         public bool Queued { get; set; }
 
@@ -28,6 +28,8 @@ namespace ConsoleApp2
             Console.WriteLine("\n\nMata in Ny order:\n\n");
             Console.WriteLine("Namn");
             order.Consignee = Console.ReadLine();
+            Console.WriteLine("Telefon");
+            order.Phone = cleanNumStr(Console.ReadLine());  // Lämpligen mobil# - Fungerar som 'unik' nyckel 
             Console.WriteLine("Leveransadress");
             order.Street = Console.ReadLine();
             Console.WriteLine("Stad");
@@ -40,8 +42,6 @@ namespace ConsoleApp2
             {
                 order.City = city;
             };
-            Console.WriteLine("Telefon");
-            order.Phone = cleanNumStr(Console.ReadLine());  // Lämpligen mobil# - Fungerar som 'unik' nyckel 
             Console.WriteLine("Beställning");
             order.Food = Console.ReadLine();
             order.Queued = true;
@@ -142,35 +142,44 @@ namespace ConsoleApp2
 
         public static void readListFromFile()
         {
-            using (StreamReader sr = new StreamReader(fileLocation))
+            try
             {
-                string line = "";
-
-                while ((line = sr.ReadLine()) != null)
+                using (StreamReader sr = new StreamReader(fileLocation))
                 {
-                    Order order = new Order();
-                    string[] values = line.Split("\t");
-                    try
+                    string line = "";
+
+                    while ((line = sr.ReadLine()) != null)
                     {
+                        Order order = new Order();
+                        string[] values = line.Split("\t");
                         order.Consignee = values[0];
-                        order.Street = values[1];
-                        order.City = values[2];
-                        order.Phone = values[3];
+                        order.Phone = values[1];
+                        order.Street = values[2];
+                        order.City = values[3];
                         order.Food = values[4];
                         order.Queued = true;
+                        orders.Add(order);
                     }
-                    catch { }
-                    orders.Add(order);
-                }
 
+                }
+                Console.WriteLine("Klart: (Har läst data från fil)");
             }
-                    }
+            catch
+            {
+                Console.WriteLine("\t¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤\n" +
+                                  "\t¤¤¤¤¤¤  FEL:  Det gick inte att läsa in från fil. Filen kanske saknas?  ¤¤¤¤¤¤\n" +
+                                  "\t¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤");
+                
+            }
+        Console.ReadKey();
+        }
         public static void GracefulEndPrg()
         {
-            if (orders.Count > 0) { 
-                   Console.WriteLine($"Du har obearbetade beställningar i kö - spara dem först!");
-                    Console.ReadKey();
-                    Menu();
+            if (orders.Count > 0)
+            {
+                Console.WriteLine("Du har obearbetade beställningar i kö - spara dem först!");
+                Console.ReadKey();
+                Menu();
             }
         }
 
