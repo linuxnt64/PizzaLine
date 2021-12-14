@@ -90,10 +90,12 @@ namespace ConsoleApp2
         {
             Console.WriteLine("Telefonnummer beställningen är registrerad på? ");
             string killPhone = cleanNumStr(Console.ReadLine());
+            bool foundOrder = false;
             foreach (Order order in orders)
             {
                 if (order.Phone == killPhone && order.Queued == true)
                 {
+                    foundOrder = true;
                     Console.WriteLine($"{order.Consignee}\t{order.Phone}\t{order.Street} {order.City}\n **** Annullerad beställning: {order.Food}");
                     orders = orders.Where(order => order.Phone != killPhone).ToList();
                     /* Jämför med:
@@ -109,12 +111,12 @@ namespace ConsoleApp2
                                       "\t\t###############################################################################");
                     break;
                 }
-                else
-                {
-                    Console.WriteLine("\n\nKunde inte hitta den beställningen?!\n\n");
-                }
-                System.Threading.Tasks.Task.Delay(2000).Wait();
             }
+            if (!foundOrder)
+            {
+                Console.WriteLine("\tKunde inte hitta den beställningen. Telefonnummer rätt?");
+            }
+             System.Threading.Tasks.Task.Delay(2000).Wait();
         }
 
         public static void makeOfferCode()
