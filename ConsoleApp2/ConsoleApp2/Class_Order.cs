@@ -3,11 +3,13 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 
+
 namespace ConsoleApp2
 
 {
     internal class Order
     {
+        public static string fileLocation = @"C:\temp\PizzaLine.txt";   //  <<<=============   Här ligger fil/sökvägen
         private static List<Order> orders = new List<Order>();
 
         public string Consignee { get; set; }
@@ -17,12 +19,11 @@ namespace ConsoleApp2
         public string Food { get; set; }
         public bool Queued { get; set; }
 
-        public static string fileLocation = @"C:\temp\PizzaLine.txt";
 
         public static void QueueNewOrder()
         {
             Order order = new Order();
-            string _city = "";
+            string city;
 
             Console.WriteLine("\n\nMata in Ny order:\n\n");
             Console.WriteLine("Namn");
@@ -30,14 +31,14 @@ namespace ConsoleApp2
             Console.WriteLine("Leveransadress");
             order.Street = Console.ReadLine();
             Console.WriteLine("Stad");
-            _city = Console.ReadLine();
-            if (_city == "")
+            city = Console.ReadLine();
+            if (city == "")
             {
                 order.City = "Skoga";
             }
             else
             {
-                order.City = _city;
+                order.City = city;
             };
             Console.WriteLine("Telefon");
             order.Phone = cleanNumStr(Console.ReadLine());  // Lämpligen mobil# - Fungerar som 'unik' nyckel 
@@ -47,7 +48,6 @@ namespace ConsoleApp2
 
             orders.Add(order);
             Console.ReadKey();
-            Console.Clear();
         }
 
         private static string cleanNumStr(string _dirty)
@@ -66,25 +66,24 @@ namespace ConsoleApp2
                 Console.WriteLine($"{order.Consignee}\t{order.Phone}\t{order.Street} {order.City}\tI kö?: {order.Queued}\nBeställt: {order.Food}");
             }
             Console.ReadKey();
-            Console.Clear();
         }
 
         public static void StartOrder()
         {
-            //Här ska bagarn markera (genom order.Queued -> false) att beställningen nu är pågående och alltså inte kan ångras
+            //Med detta kan bagarn läsa nästa bestaällning i kön och markera (genom order.Queued -> false) att den nu är pågående och alltså inte kan ångras
             foreach (Order order in orders)
             {
                 if (order.Queued == true)
                 {
-                    Console.WriteLine("#####################################################################\n\n" +
-                                      $"Nästa beställning att behandlas:\n{order.Consignee}\t{order.Phone}\t{order.Street} {order.City}\n\nBeställt: {order.Food}\n\n" +
-                                      "#####################################################################");
+                    Console.WriteLine(
+                        "\t\t---------------------------------------------------------------------------------------------------\n\n" +
+                       $"\t\t\tNästa beställning att behandlas:\n\t\t\t{order.Consignee}\t{order.Phone}\t{order.Street} {order.City}\n\n\t\t\tBeställt: {order.Food}\n\n" +
+                        "\t\t---------------------------------------------------------------------------------------------------\n\n");
                     order.Queued = false;
                     break;
                 }
             }
             Console.ReadKey();
-            Console.Clear();
         }
 
         public static void RemoveOrder()
@@ -97,21 +96,25 @@ namespace ConsoleApp2
                 {
                     Console.WriteLine($"{order.Consignee}\t{order.Phone}\t{order.Street} {order.City}\n **** Annullerad beställning: {order.Food}");
                     orders = orders.Where(order => order.Phone != killPhone).ToList();
+                    /* Jämför med:
+                    var index = participantList. IndexOf(participant) ;
+                    participantList . RemoveAt(index) ;
+                    */
                     break;
                 }
                 else if (order.Phone == killPhone)
                 {
-                    Console.WriteLine("#####################################################################\n\n" +
-                                        "Tyvärr!!  Denna beställning är redan på väg och kan därför inte avbeställas\n\n" +
-                                      "#####################################################################");
+                    Console.WriteLine("\t\t###############################################################################\n\n" +
+                                      "\t\t# Tyvärr!!  Denna beställning är redan på väg och kan därför inte avbeställas #\n\n" +
+                                      "\t\t###############################################################################");
                     break;
                 }
                 else
                 {
                     Console.WriteLine("\n\nKunde inte hitta den beställningen?!\n\n");
                 }
+                System.Threading.Tasks.Task.Delay(2000).Wait();
             }
-            // Console.Clear behövs inte här, då ListOrders() körs direkt efter i menyvalet
         }
 
         public static void makeOfferCode()
@@ -119,48 +122,79 @@ namespace ConsoleApp2
             Console.WriteLine("En rabattkod: " + Guid.NewGuid());
             // Såklart ska den kopplas till kund och menyval för 'redeem' läggas till
             Console.ReadKey();
-            Console.Clear();
         }
 
         public static void saveListToFile()
         {
-            StreamWriter sw = new StreamWriter(fileLocation);
-
-
-            Console.WriteLine("Sparar nu ner data till fil ...\n\n");
-            foreach(Order order in orders)
+            using (StreamWriter sw = new StreamWriter(fileLocation))
             {
-                sw.WriteLine(order.Consignee + "\t" + order.Phone + "\t" + order.Street + "\t" + order.City + "\t"  + order.Food);
+
+                Console.WriteLine("Sparar nu ner köade kunder till fil ...\n\n");
+                foreach (Order order in orders)
+                {
+                    if (order.Queued) sw.WriteLine(order.Consignee + "\t" + order.Phone + "\t" + order.Street + "\t" + order.City + "\t" + order.Food);
+                }
+                Console.WriteLine("Klart: (Spara data till fil)");
+                orders.Clear();
+                Console.ReadKey();
             }
-            //sw.WriteLine("From the StreamWriter class");
-            sw.Close();
+        }
 
-            Console.WriteLine("Klart: Spara data till fil ...");
-            Console.ReadKey();
-            Console.Clear();
+        public static void readListFromFile()
+        {
+            using (StreamReader sr = new StreamReader(fileLocation))
+            {
+                string line = "";
 
+                while ((line = sr.ReadLine()) != null)
+                {
+                    Order order = new Order();
+                    string[] values = line.Split("\t");
+                    try
+                    {
+                        order.Consignee = values[0];
+                        order.Street = values[1];
+                        order.City = values[2];
+                        order.Phone = values[3];
+                        order.Food = values[4];
+                        order.Queued = true;
+                    }
+                    catch { }
+                    orders.Add(order);
+                }
+
+            }
+                    }
+        public static void GracefulEndPrg()
+        {
+            if (orders.Count > 0) { 
+                   Console.WriteLine($"Du har obearbetade beställningar i kö - spara dem först!");
+                    Console.ReadKey();
+                    Menu();
+            }
         }
 
         public static void Menu()
         {
             char menuSwitch;
-
             do
             {
-                Console.WriteLine("\n\n**************** Välkommen till registret för OnlinePizzabeställning **************** \n\n");
-                Console.WriteLine("Le Menü:\n");
-                Console.WriteLine("1. Ny beställning");
-                Console.WriteLine("2. Starta");
-                Console.WriteLine("3. Lista");
-                Console.WriteLine("4. Avbeställning ");
+                Console.Clear();
+                Console.WriteLine("\tLe Menü:\n");
+                Console.WriteLine("\t1. Ny beställning");
+                Console.WriteLine("\t2. Starta");
+                Console.WriteLine("\t3. Lista");
+                Console.WriteLine("\t4. Avbeställning ");
                 Console.WriteLine();
-                Console.WriteLine("6. Fixa rabattkod");
+                Console.WriteLine("\t6. Fixa rabattkod");
                 Console.WriteLine();
-                Console.WriteLine("8. Spara listan");
+                Console.WriteLine("\t7. Spara kön till fil");
+                Console.WriteLine("\t8. Läs in kön från fil");
                 Console.WriteLine();
-                Console.WriteLine("9. Avsluta programmet");
+                Console.WriteLine("\t9. Avsluta programmet");
 
                 menuSwitch = Console.ReadKey().KeyChar;
+                Console.Clear();
                 switch (menuSwitch)
                 {
                     case '1':
@@ -174,26 +208,22 @@ namespace ConsoleApp2
                         break;
                     case '4':
                         RemoveOrder();
-                        ListOrders();
+                        //ListOrders();
                         break;
                     case '6':
                         makeOfferCode();
                         break;
-                    case '8':
+                    case '7':
                         saveListToFile();
                         break;
-                    /*                    case 7:
-                                            ListOrders();
-                                            Console.WriteLine("\n\nVilken order (telefonnummer) vill du flytta fram i kön?");
-                                            // metod för att flytta i kön
-                                            Console.ReadKey();
-                                            break;
-                    */
+                    case '8':
+                        readListFromFile();
+                        break;
                     default:
                         break;
                 }
-                Console.Clear();
             } while (menuSwitch != '9');
+            GracefulEndPrg();
         }
     }
 }

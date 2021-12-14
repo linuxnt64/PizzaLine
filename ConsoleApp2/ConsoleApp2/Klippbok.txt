@@ -1,22 +1,4 @@
-﻿        public Customer(string _name, string _street, string _city, string _phone, string _order, bool _served)
-        {
-            Name = _name;
-            Street = _street;
-            if (_city == "") {
-                City = "Skoga";
-            } else {
-                City = _city; };
-            Phone = _phone;
-            Order = _order;
-            Queued = _queued;
-        }
-
-    //public string FirstName => 
-
-
-Inmatning:
-
-1Staffan
+﻿1Staffan
 Kvarnv. 2
 
 071/23 456 789
@@ -39,4 +21,5 @@ Kvarnv. 2
 
 123456789
 Pizzakanter
+
 
